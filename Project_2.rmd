@@ -15,8 +15,28 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r}
+library(gmodels)
+library(class)
+library(caret)
+hotel <- read.csv("hotel_booking.csv")
+hotel$arrival_date_week_number <- as.factor(hotel$arrival_date_week_number)
+hotel$agent <- ifelse(is.na(hotel$agent), -1, hotel$agent)
+hotel$agent <- as.factor(hotel$agent)
+hotel$company <- ifelse(is.na(hotel$company), -1, hotel$company)
+hotel$company <- as.factor(hotel$company)
+
+model <- glm(is_canceled ~ lead_time +    stays_in_week_nights +  adr  , data = hotel)
+summary(model)
+
+
+
+
+predict1 <- predict(model, hotel, type="response")
+predict2 <- as.factor(ifelse(predict1>0.5,1,0))
+
+matrix <- confusionMatrix(predict2, as.factor(hotel$is_canceled))
+matrix
 ```
 
 ## Including Plots
