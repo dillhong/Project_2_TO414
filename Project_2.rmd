@@ -60,13 +60,3 @@ predict2 <- as.factor(ifelse(predict1>0.5,1,0))
 matrix <- confusionMatrix(predict2, as.factor(hotel$is_canceled))
 matrix
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
