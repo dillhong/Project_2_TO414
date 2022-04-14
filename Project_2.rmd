@@ -42,6 +42,7 @@ hotel$arrival_date_day_of_month <- NULL
 
 
 hotel <- subset(hotel, hotel == "City Hotel")
+hotel$hotel <- NULL
 head(hotel, 200)
 
 
@@ -55,13 +56,30 @@ colSums(is.na(hotel))
 # Randomize the rows in the data (shuffling the rows)
 set.seed(12345)
 hotel_random <- hotel[sample(nrow(hotel)),]
+
+head(hotel_random)
 ```
 
 ```{r}
-#index <- 1:ncol(hotel_random)
-#hotel_random[ , index] <- lapply(hotel_random[ , index], as.factor)
-#str(hotel_random)
+hotel_random$arrival_date_month <- as.factor(hotel_random$arrival_date_month)
+hotel_random$meal <- as.factor(hotel_random$meal)
+hotel_random$country <- as.factor(hotel_random$country)
+hotel_random$market_segment <- as.factor(hotel_random$market_segment)
+hotel_random$distribution_channel <- as.factor(hotel_random$distribution_channel)
+hotel_random$reserved_room_type <- as.factor(hotel_random$reserved_room_type)
+hotel_random$assigned_room_type <- as.factor(hotel_random$assigned_room_type)
+hotel_random$deposit_type <- as.factor(hotel_random$deposit_type)
+hotel_random$customer_type <- as.factor(hotel_random$customer_type)
+hotel_random$reservation_status <- as.factor(hotel_random$reservation_status)
+
 ```
+
+```{r}
+#get rid of factors so we can use KNN
+hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
+str(hotelDummy)
+```
+
 
 
 ## Linear Regression Model
@@ -90,11 +108,8 @@ normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
 
-# We are going to normalize everything 
-summary(hotel_random)
-
-
-hotel_norm <- as.data.frame(lapply(hotel_random, normalize))
+#Normalize entire dataframe
+hotel_norm <- as.data.frame(lapply(hotelDummy, normalize))
 
 ```
 
