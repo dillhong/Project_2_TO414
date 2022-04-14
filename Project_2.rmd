@@ -48,6 +48,21 @@ head(hotel, 200)
 # Checking for NA values in all of the column data
 colSums(is.na(hotel))
 ```
+## Randomize Data
+### Change Data in Linear Regression
+
+```{r}
+# Randomize the rows in the data (shuffling the rows)
+set.seed(12345)
+hotel_random <- hotel[sample(nrow(hotel)),]
+```
+
+```{r}
+#index <- 1:ncol(hotel_random)
+#hotel_random[ , index] <- lapply(hotel_random[ , index], as.factor)
+#str(hotel_random)
+```
+
 
 ## Linear Regression Model
 ```{r}
@@ -63,3 +78,30 @@ predict2 <- as.factor(ifelse(predict1>0.5,1,0))
 matrix <- confusionMatrix(predict2, as.factor(hotel$is_canceled))
 matrix
 ```
+
+## KNN Model 
+
+### Normalize Data 
+```{r}
+library(class)
+
+#Normalize the data
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+# We are going to normalize everything 
+summary(hotel_random)
+
+
+hotel_norm <- as.data.frame(lapply(hotel_random, normalize))
+
+```
+
+
+## ANN Model 
+
+```{r}
+head(hotel)
+```
+
