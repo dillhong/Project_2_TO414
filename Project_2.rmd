@@ -29,6 +29,9 @@ hotel$company <- ifelse(is.na(hotel$company), -1, hotel$company)
 hotel$company <- as.factor(hotel$company)
 ```
 
+
+
+
 ```{r}
 # Delete Unnecessary Columns
 
@@ -44,11 +47,30 @@ hotel$arrival_date_day_of_month <- NULL
 hotel <- subset(hotel, hotel == "City Hotel")
 hotel$hotel <- NULL
 head(hotel, 200)
-
-
-# Checking for NA values in all of the column data
-colSums(is.na(hotel))
 ```
+
+```{r}
+cbind(
+   lapply(
+     lapply(hotel, is.na)
+     , sum)
+   )
+```
+
+
+
+
+```{r}
+# Checking for NA values in all of the column data
+hotel$children <- ifelse(is.na(hotel$children), median(hotel$children, na.rm = TRUE), hotel$children)
+
+cbind(
+   lapply(
+     lapply(hotel, is.na)
+     , sum)
+   )
+```
+
 ## Randomize Data
 ### Change Data in Linear Regression
 
@@ -60,6 +82,32 @@ hotel_random <- hotel[sample(nrow(hotel)),]
 head(hotel_random)
 ```
 
+### Caret Train Method
+```{r}
+## Customizing the tuning process ----
+# use trainControl() to alter resampling strategy
+ctrl <- trainControl(method = "cv", number = 10,
+                     selectionFunction = "oneSE")
+
+# use expand.grid() to create grid of tuning parameters
+grid <- expand.grid(.model = "tree",
+                    .trials = c(1, 5, 10, 15, 20, 25, 30, 35, 40, 45),
+                    .winnow = "FALSE")
+
+# look at the result of expand.grid()
+grid
+
+# customize train() with the control list and grid of parameters 
+m <- train(is_canceled ~ ., data = hotel, method = "C5.0",
+           metric = "Kappa",
+           trControl = ctrl,
+           tuneGrid = grid)
+m
+```
+
+
+
+### Not Caret Train Method
 ```{r}
 hotel_random$arrival_date_month <- as.factor(hotel_random$arrival_date_month)
 hotel_random$meal <- as.factor(hotel_random$meal)
