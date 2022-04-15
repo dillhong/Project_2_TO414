@@ -71,6 +71,10 @@ cbind(
 
 ### Not Caret Train Method
 ```{r}
+# Randomize the rows in the data (shuffling the rows)
+set.seed(12345)
+hotel_random <- hotel[sample(nrow(hotel)),]
+
 hotel_random$arrival_date_month <- as.factor(hotel_random$arrival_date_month)
 hotel_random$meal <- as.factor(hotel_random$meal)
 hotel_random$country <- as.factor(hotel_random$country)
@@ -115,11 +119,6 @@ matrix_knn
 ### Normalize Data 
 ```{r}
 library(class)
-# Randomize the rows in the data (shuffling the rows)
-set.seed(12345)
-hotel_random <- hotel[sample(nrow(hotel)),]
-
-head(hotel_random)
 
 #get rid of factors so we can use KNN
 hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
