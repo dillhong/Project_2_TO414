@@ -106,11 +106,28 @@ normalize <- function(x) {
 
 #Normalize entire dataframe
 hotel_norm <- as.data.frame(lapply(hotelDummy, normalize))
-
+str(hotel_norm)
+summary(hotel_norm)
 ```
 
 
+
 ## Linear Regression Model
+
+### Train and Test Dataset
+```{r}
+test_set <- sample(1:nrow(hotel_random), 0.3*nrow(hotel_random))
+
+hotel_train <- hotel_random[-test_set, ]
+hotel_test <- hotel_random[test_set, ]
+
+#Now the response (aka Labels) - only the yyes column
+hotel_train_labels <- hotel_random[-test_set, "is_canceled"]
+hotel_test_labels <- hotel_random[test_set, "is_canceled"]
+
+```
+
+### Model
 ```{r}
 #Ryan
 #best r squared and most significant variables
@@ -120,44 +137,52 @@ summary(model)
 
 ```
 
+
+
 ## KNN Model 
 
+### Train and Test Dataset
+```{r}
+hotel_norm_train <- hotel_norm[-test_set, -match("is_canceled",names(hotel_norm))]
+hotel_norm_test <- hotel_norm[test_set, -match("is_canceled",names(hotel_norm))]
+
+#Now the response (aka Labels) - only the yyes column
+hotel_norm_train_labels <- hotel_norm[-test_set, "is_canceled"]
+hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
+```
+
+### Model
 ```{r}
 
 
 
-
 ```
-
 
 ## ANN Model 
 
-```{r}
-library(neuralnet)
-```
 
+### Train and Test Dataset
 ```{r}
-hotel_train <- hotel_norm[-test_set, -match("yyes",names(tele_norm))]
-tele_test <- tele_norm[test_set, -match("yyes",names(tele_norm))]
+hotel_norm_train <- hotel_norm[-test_set, ]
+hotel_norm_test <- hotel_norm[test_set, ]
 
 #Now the response (aka Labels) - only the yyes column
-tele_train_labels <- tele_norm[-test_set, "yyes"]
-tele_test_labels <- tele_norm[test_set, "yyes"]
+hotel_norm_train_labels <- hotel_norm[-test_set, "is_canceled"]
+hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 ```
 
-
+###Model
 ```{r}
+library(neuralnet)
+
 hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm)
-```
 
 
-```{r}
+
+
 annprediction <- predict(hotel_ann, hotel_norm, type="response")
 factorize_ann_prediction <- as.factor(ifelse(annprediction>0.5,1,0))
-```
 
-
-```{r}
 ann_confusionmaxtrix <- confusionMatrix(as.factor(factorize_ann_prediction), as.factor(hotel_norm$is_canceled))
 ann_confusionmaxtrix
 
@@ -165,12 +190,27 @@ ann_confusionmaxtrix
 
 ##SVM
 
+###Train and Test Datasets
 ```{r}
+hotel_train <- hotel_random[-test_set, ]
+hotel_test <- hotel_random[test_set, ]
+```
+
+### Model
+```{r}
+
 
 ```
 
 ##Decision Tree
 
+###Train and Test Datasets
+```{r}
+hotel_train <- hotel_random[-test_set, ]
+hotel_test <- hotel_random[test_set, ]
+```
+
+###Model
 ```{r}
 
 
@@ -187,5 +227,3 @@ ann_confusionmaxtrix
 
 
 ##Conclusion
-
-
