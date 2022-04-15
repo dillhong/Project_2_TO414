@@ -89,7 +89,7 @@ hotel_random$reservation_status <- as.factor(hotel_random$reservation_status)
 ```{r}
 #Ryan
 #best r squared and most significant variables
-model <- glm(is_canceled ~ lead_time +    stays_in_week_nights +  adr  , data = hotel)
+model <- glm(is_canceled ~ lead_time +  stays_in_week_nights +  adr  , data = hotel)
 summary(model)
 
 
