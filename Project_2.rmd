@@ -27,7 +27,6 @@ hotel$agent <- ifelse(is.na(hotel$agent), -1, hotel$agent)
 hotel$agent <- as.factor(hotel$agent)
 hotel$company <- ifelse(is.na(hotel$company), -1, hotel$company)
 hotel$company <- as.factor(hotel$company)
-hotel$is_canceled <- as.factor(hotel$is_canceled)
 
 # Delete Unnecessary Columns
 
@@ -126,13 +125,7 @@ summary(model)
 ```{r}
 
 
-ctrl <- trainControl(method = "cv",
-                     number = 10, selectionFunction = "oneSE")
-hotel_knn <- train(is_canceled ~  ., data = hotel, method = "knn", metric = "Kappa", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 20)
 
-hotel_knn
-matrix_knn <- confusionMatrix(hotel_knn, norm = "none")
-matrix_knn
 
 ```
 
