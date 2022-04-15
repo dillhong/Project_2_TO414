@@ -44,6 +44,7 @@ hotel$hotel <- NULL
 head(hotel, 200)
 ```
 
+
 ### Check for NAs
 ```{r}
 cbind(
@@ -146,14 +147,28 @@ summary(model)
 hotel_norm_train <- hotel_norm[-test_set, -match("is_canceled",names(hotel_norm))]
 hotel_norm_test <- hotel_norm[test_set, -match("is_canceled",names(hotel_norm))]
 
-#Now the response (aka Labels) - only the yyes column
+#Now the response (aka Labels)
 hotel_norm_train_labels <- hotel_norm[-test_set, "is_canceled"]
 hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 ```
 
+
+```{r}
+cbind(
+   lapply(
+     lapply(hotel_norm_train, is.na)
+     , sum)
+   )
+```
+
+
+
 ### Model
 ```{r}
+# Download Library 
+library(class)
 
+hotel_knn <- knn(train = hotel_norm_train[,-1], test = hotel_norm_test[, -1], cl = hotel_norm_train_labels$is_canceled, k = (sqrt(nrow(hotel_norm_train))))
 
 
 ```
@@ -196,10 +211,34 @@ hotel_train <- hotel_random[-test_set, ]
 hotel_test <- hotel_random[test_set, ]
 ```
 
-### Model
+
+### Model #1
 ```{r}
+library(kernlab)
+
+cancellation_classifier <- ksvm(is_canceled ~ ., data = hotel_train, kernel = "vanilladot")
+```
 
 
+
+```{r}
+cancellation_predictions <- predict(cancellation_classifier, hotel_test[, -1])
+
+head(cancellation_predictions)
+
+table(cancellation_predictions, hotel_test$is_canceled)
+
+# look only at agreement vs. non-agreement
+# construct a vector of TRUE/FALSE indicating correct/incorrect predictions
+agreement <- cancellation_predictions == hotel_test$is_canceled
+table(agreement)
+prop.table(table(agreement))
+
+```
+
+
+```{r}
+svm_model2 <- ksvm(ChurnYes ~ ., data = telco_random, kernel = "rbfdot")
 ```
 
 ##Decision Tree
