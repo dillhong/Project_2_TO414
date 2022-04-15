@@ -99,7 +99,13 @@ summary(model)
 
 ```{r}
 
-
+#caret train glm model
+ctrl <- trainControl(method = "cv",
+                     number = 10, selectionFunction = "oneSE")
+tele_knn <- train(y ~  ., data = tele, method = "knn", metric = "Kappa", trControl = ctrl, preProcess = c("center","scale"), tuneLength = 20)
+tele_knn
+matrix_knn <- confusionMatrix(tele_knn, norm = "none")
+matrix_knn
 
 ```
 
