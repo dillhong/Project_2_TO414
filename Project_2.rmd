@@ -49,6 +49,7 @@ hotel$hotel <- NULL
 head(hotel, 200)
 ```
 
+## Check for NAs
 ```{r}
 cbind(
    lapply(
@@ -59,7 +60,7 @@ cbind(
 
 
 
-
+## Remove NAs from Children Column
 ```{r}
 # Checking for NA values in all of the column data
 hotel$children <- ifelse(is.na(hotel$children), median(hotel$children, na.rm = TRUE), hotel$children)
