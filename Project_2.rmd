@@ -27,12 +27,8 @@ hotel$agent <- ifelse(is.na(hotel$agent), -1, hotel$agent)
 hotel$agent <- as.factor(hotel$agent)
 hotel$company <- ifelse(is.na(hotel$company), -1, hotel$company)
 hotel$company <- as.factor(hotel$company)
-```
+hotel$is_canceled <- as.factor(hotel$is_canceled)
 
-
-
-
-```{r}
 # Delete Unnecessary Columns
 
 hotel$name <- NULL
@@ -49,7 +45,7 @@ hotel$hotel <- NULL
 head(hotel, 200)
 ```
 
-## Check for NAs
+### Check for NAs
 ```{r}
 cbind(
    lapply(
@@ -60,7 +56,7 @@ cbind(
 
 
 
-## Remove NAs from Children Column
+### Remove NAs from Children Column
 ```{r}
 # Checking for NA values in all of the column data
 hotel$children <- ifelse(is.na(hotel$children), median(hotel$children, na.rm = TRUE), hotel$children)
@@ -71,41 +67,6 @@ cbind(
      , sum)
    )
 ```
-
-## Randomize Data
-### Change Data in Linear Regression
-
-```{r}
-# Randomize the rows in the data (shuffling the rows)
-set.seed(12345)
-hotel_random <- hotel[sample(nrow(hotel)),]
-
-head(hotel_random)
-```
-
-### Caret Train Method
-```{r}
-## Customizing the tuning process ----
-# use trainControl() to alter resampling strategy
-ctrl <- trainControl(method = "cv", number = 10,
-                     selectionFunction = "oneSE")
-
-# use expand.grid() to create grid of tuning parameters
-grid <- expand.grid(.model = "tree",
-                    .trials = c(1, 5, 10, 15, 20, 25, 30, 35, 40, 45),
-                    .winnow = "FALSE")
-
-# look at the result of expand.grid()
-grid
-
-# customize train() with the control list and grid of parameters 
-m <- train(is_canceled ~ ., data = hotel, method = "C5.0",
-           metric = "Kappa",
-           trControl = ctrl,
-           tuneGrid = grid)
-m
-```
-
 
 
 ### Not Caret Train Method
@@ -123,34 +84,40 @@ hotel_random$reservation_status <- as.factor(hotel_random$reservation_status)
 
 ```
 
-```{r}
-#get rid of factors so we can use KNN
-hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
-str(hotelDummy)
-```
-
-
 
 ## Linear Regression Model
 ```{r}
+#Ryan
+#best r squared and most significant variables
 model <- glm(is_canceled ~ lead_time +    stays_in_week_nights +  adr  , data = hotel)
 summary(model)
 
 
-
-
-predict1 <- predict(model, hotel, type="response")
-predict2 <- as.factor(ifelse(predict1>0.5,1,0))
-
-matrix <- confusionMatrix(predict2, as.factor(hotel$is_canceled))
-matrix
 ```
 
 ## KNN Model 
 
+```{r}
+
+
+
+```
+
+
+## ANN Model 
+
 ### Normalize Data 
 ```{r}
 library(class)
+# Randomize the rows in the data (shuffling the rows)
+set.seed(12345)
+hotel_random <- hotel[sample(nrow(hotel)),]
+
+head(hotel_random)
+
+#get rid of factors so we can use KNN
+hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
+str(hotelDummy)
 
 #Normalize the data
 normalize <- function(x) {
@@ -162,10 +129,29 @@ hotel_norm <- as.data.frame(lapply(hotelDummy, normalize))
 
 ```
 
-
-## ANN Model 
+##SVM
 
 ```{r}
-head(hotel)
+
 ```
+
+##Decision Tree
+
+```{r}
+
+
+```
+
+
+##Stacked Model
+
+```{r}
+
+
+
+```
+
+
+##Conclusion
+
 
