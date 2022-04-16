@@ -9,12 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
 ##Libraries
 ```{r}
 library(gmodels)
@@ -58,6 +52,8 @@ hotel$company <- NULL
 hotel <- subset(hotel, hotel == "City Hotel")
 hotel$hotel <- NULL
 head(hotel, 200)
+
+str(hotel)
 ```
 
 ### Check for NAs
@@ -99,10 +95,6 @@ hotel_random$reserved_room_type <- as.factor(hotel_random$reserved_room_type)
 hotel_random$assigned_room_type <- as.factor(hotel_random$assigned_room_type)
 hotel_random$deposit_type <- as.factor(hotel_random$deposit_type)
 hotel_random$customer_type <- as.factor(hotel_random$customer_type)
-
-
-# Randomize again for good measure
-hotel_random <- hotel_random[sample(nrow(hotel_random)),]
 ```
 
 
@@ -172,6 +164,8 @@ hotel_norm_test_labels <- hotel_random[test_set, "is_canceled"]
 hotel_knn <- knn(train = hotel_norm_train, test = hotel_norm_test,
                       cl = hotel_norm_train_labels, k=sqrt(nrow(hotel_norm_train)))
 
+write.csv(hotel_knn, "hotel_knn_pred.csv")
+
 knn_matrix <- confusionMatrix(hotel_knn, as.factor(hotel_norm_test_labels))
 knn_matrix
 ```
@@ -202,6 +196,8 @@ hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm)
 ```{r}
 annprediction <- predict(hotel_ann, hotel_norm, type="response")
 factorize_ann_prediction <- as.factor(ifelse(annprediction>0.5,1,0))
+
+write.csv(factorize_ann_prediction, "hotel_ann_pred.csv")
 ```
 
 ###Confusion Matrix
@@ -233,6 +229,8 @@ svm_predictions <- ifelse(svm_predictions > 0.5, 1, 0)
 
 svm_predictions <- as.factor(svm_predictions)
 
+write.csv(svm_predictions, "hotel_svm_predictions.csv")
+
 svm_matrix <- confusionMatrix(svm_predictions, as.factor(hotel_test_labels))
 svm_matrix
 
@@ -263,6 +261,8 @@ hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled)
 ```{r}
 hotel_pred <- predict(hotel_decision_model, hotel_test)
 plot(hotel_pred)
+
+write.csv(hotel_pred, "decision_tree_pred.csv")
 ```
 
 ```{r}
@@ -276,6 +276,9 @@ hotel_matrix <- confusionMatrix(as.factor(hotel_test$is_canceled), hotel_pred)
 hotel_matrix
 ```
 
+```{r}
+
+```
 
 
 ##Stacked Model
