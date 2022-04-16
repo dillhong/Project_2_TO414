@@ -156,12 +156,14 @@ summary(model)
 
 ### Train and Test Dataset
 ```{r}
+test_set <- sample(1:nrow(hotel_norm), 0.2*nrow(hotel_norm))
+
 hotel_norm_train <- hotel_norm[-test_set, ]
 hotel_norm_test <- hotel_norm[test_set, ]
 
 #Now the response (aka Labels) - only the yyes column
-hotel_norm_train_labels <- hotel_norm[-test_set, "is_canceled"]
-hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
+hotel_norm_train_labels <- hotel_random[-test_set, "is_canceled"]
+hotel_norm_test_labels <- hotel_random[test_set, "is_canceled"]
 ```
 
 ### Model
@@ -180,6 +182,8 @@ knn_matrix
 ### Train and Test Dataset
 ```{r}
 hotel_norm$is_canceled <- hotel_random$is_canceled
+
+test_set <- sample(1:nrow(hotel_norm), 0.2*nrow(hotel_norm))
 
 hotel_norm_train <- hotel_norm[-test_set, ]
 hotel_norm_test <- hotel_norm[test_set, ]
@@ -206,6 +210,8 @@ ann_confusionmaxtrix
 
 ###Train and Test Datasets
 ```{r}
+test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
+
 hotel_train <- hotel_random[-test_set, ]
 hotel_test <- hotel_random[test_set, ]
 
