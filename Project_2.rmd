@@ -42,6 +42,7 @@ hotel$arrival_date_year <- NULL
 hotel$arrival_date_week_number <- NULL
 hotel$arrival_date_day_of_month <- NULL
 hotel$reservation_status_date <- NULL
+hotel$reservation_status <- NULL
 
 #hotel$country <- ifelse(is.na(hotel$country), "No Country", na.rm = TRUE), hotel$country)
 
