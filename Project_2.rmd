@@ -120,7 +120,6 @@ normalize <- function(x) {
 
 #Normalize entire dataframe
 hotel_norm <- as.data.frame(lapply(hotelDummy[2:ncol(hotelDummy)], normalize))
-hotel_norm$is_canceled <- hotel_random$is_canceled
 
 ```
 
@@ -170,7 +169,6 @@ hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 
 hotel_knn <- knn(train = hotel_norm_train, test = hotel_norm_test,
                       cl = hotel_norm_train_labels, k=sqrt(nrow(hotel_norm_train)))
-hotel_knn
 
 knn_matrix <- confusionMatrix(hotel_knn, as.factor(hotel_norm_test_labels))
 knn_matrix
@@ -181,6 +179,8 @@ knn_matrix
 
 ### Train and Test Dataset
 ```{r}
+hotel_norm$is_canceled <- hotel_random$is_canceled
+
 hotel_norm_train <- hotel_norm[-test_set, ]
 hotel_norm_test <- hotel_norm[test_set, ]
 
@@ -192,8 +192,6 @@ hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 ###Model
 ```{r}
 hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm)
-
-
 
 
 annprediction <- predict(hotel_ann, hotel_norm, type="response")
