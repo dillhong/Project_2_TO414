@@ -256,12 +256,13 @@ prop.table(table(hotel_test$is_canceled))
 library(C50)
 hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled))
 
-plot(hotel_decision_model)
+#plot(hotel_decision_model)
 ```
 
 ###Prediction
 ```{r}
 hotel_pred <- predict(hotel_decision_model, hotel_test)
+plot(hotel_pred)
 ```
 
 ```{r}
