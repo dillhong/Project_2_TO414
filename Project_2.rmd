@@ -100,11 +100,19 @@ hotel_random <- hotel[sample(nrow(hotel)),]
 hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
 str(hotelDummy)
 
+
 #Normalize the data
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
+```
 
+```{r}
+hotelDummy_n <- as.data.frame(lapply(hotelDummy[2:ncol(hotelDummy)], normalize))
+```
+
+
+```{r}
 #Normalize entire dataframe
 hotel_norm <- as.data.frame(lapply(hotelDummy, normalize))
 str(hotel_norm)
