@@ -161,7 +161,7 @@ test_set <- sample(1:nrow(hotel_norm), 0.2*nrow(hotel_norm))
 hotel_norm_train <- hotel_norm[-test_set, ]
 hotel_norm_test <- hotel_norm[test_set, ]
 
-#Now the response (aka Labels) - only the yyes column
+#Now the response (aka Labels) - only the is_canceled column
 hotel_norm_train_labels <- hotel_random[-test_set, "is_canceled"]
 hotel_norm_test_labels <- hotel_random[test_set, "is_canceled"]
 ```
@@ -196,11 +196,16 @@ hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 ###Model
 ```{r}
 hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm)
+```
 
-
+###Prediction
+```{r}
 annprediction <- predict(hotel_ann, hotel_norm, type="response")
 factorize_ann_prediction <- as.factor(ifelse(annprediction>0.5,1,0))
+```
 
+###Confusion Matrix
+```{r}
 ann_confusionmaxtrix <- confusionMatrix(as.factor(factorize_ann_prediction), as.factor(hotel_norm$is_canceled))
 ann_confusionmaxtrix
 
@@ -221,8 +226,8 @@ hotel_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ### Model
 ```{r}
-svm <- ksvm(is_canceled ~ ., data = hotel,
-                          kernel = "vanilladot")
+svm <- ksvm(is_canceled ~ ., data = hotel, kernel = "vanilladot")
+
 svm_predictions <- predict(svm, hotel_test, type= "response")
 svm_predictions <- ifelse(svm_predictions > 0.5, 1, 0)
 
@@ -250,7 +255,8 @@ prop.table(table(hotel_test$is_canceled))
 
 library(C50)
 hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled))
-hotel_decision_model
+
+plot(hotel_decision_model)
 ```
 
 ###Prediction
