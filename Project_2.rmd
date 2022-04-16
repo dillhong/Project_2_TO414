@@ -15,18 +15,22 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
+##Libraries
+```{r}
+library(gmodels)
+library(caret)
+library(class)
+library(neuralnet)
+library(kernlab)
+library(C50)
+```
 ## Data Cleaning and Exploration
 
 ```{r}
-library(gmodels)
-library(class)
-library(caret)
+
 hotel <- read.csv("hotel_booking.csv")
 hotel$arrival_date_week_number <- as.factor(hotel$arrival_date_week_number)
-hotel$agent <- ifelse(is.na(hotel$agent), -1, hotel$agent)
-hotel$agent <- as.factor(hotel$agent)
-hotel$company <- ifelse(is.na(hotel$company), -1, hotel$company)
-hotel$company <- as.factor(hotel$company)
+
 
 # Delete Unnecessary Columns
 
@@ -37,13 +41,16 @@ hotel$credit_card <- NULL
 hotel$arrival_date_year <- NULL
 hotel$arrival_date_week_number <- NULL
 hotel$arrival_date_day_of_month <- NULL
+hotel$reservation_status_date <- NULL
+hotel$country <- NULL
+hotel$agent <- NULL
+hotel$company <- NULL
 
 
 hotel <- subset(hotel, hotel == "City Hotel")
 hotel$hotel <- NULL
 head(hotel, 200)
 ```
-
 
 ### Check for NAs
 ```{r}
@@ -77,19 +84,17 @@ hotel_random <- hotel[sample(nrow(hotel)),]
 
 hotel_random$arrival_date_month <- as.factor(hotel_random$arrival_date_month)
 hotel_random$meal <- as.factor(hotel_random$meal)
-hotel_random$country <- as.factor(hotel_random$country)
+
 hotel_random$market_segment <- as.factor(hotel_random$market_segment)
 hotel_random$distribution_channel <- as.factor(hotel_random$distribution_channel)
 hotel_random$reserved_room_type <- as.factor(hotel_random$reserved_room_type)
 hotel_random$assigned_room_type <- as.factor(hotel_random$assigned_room_type)
 hotel_random$deposit_type <- as.factor(hotel_random$deposit_type)
 hotel_random$customer_type <- as.factor(hotel_random$customer_type)
-hotel_random$reservation_status <- as.factor(hotel_random$reservation_status)
 
-library(class)
 
 # Randomize again for good measure
-hotel_random <- hotel[sample(nrow(hotel)),]
+hotel_random <- hotel_random[sample(nrow(hotel_random)),]
 ```
 
 
@@ -100,23 +105,15 @@ hotel_random <- hotel[sample(nrow(hotel)),]
 hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
 str(hotelDummy)
 
-
 #Normalize the data
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
-```
 
-```{r}
-hotelDummy_n <- as.data.frame(lapply(hotelDummy[2:ncol(hotelDummy)], normalize))
-```
-
-
-```{r}
 #Normalize entire dataframe
-hotel_norm <- as.data.frame(lapply(hotelDummy, normalize))
-str(hotel_norm)
-summary(hotel_norm)
+hotel_norm <- as.data.frame(lapply(hotelDummy[2:ncol(hotelDummy)], normalize))
+hotel_norm$is_canceled <- hotel_random$is_canceled
+
 ```
 
 
@@ -152,33 +149,23 @@ summary(model)
 
 ### Train and Test Dataset
 ```{r}
-hotel_norm_train <- hotel_norm[-test_set, -match("is_canceled",names(hotel_norm))]
-hotel_norm_test <- hotel_norm[test_set, -match("is_canceled",names(hotel_norm))]
+hotel_norm_train <- hotel_norm[-test_set, ]
+hotel_norm_test <- hotel_norm[test_set, ]
 
-#Now the response (aka Labels)
+#Now the response (aka Labels) - only the yyes column
 hotel_norm_train_labels <- hotel_norm[-test_set, "is_canceled"]
 hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 ```
 
-
-```{r}
-cbind(
-   lapply(
-     lapply(hotel_norm_train, is.na)
-     , sum)
-   )
-```
-
-
-
 ### Model
 ```{r}
-# Download Library 
-library(class)
 
-hotel_knn <- knn(train = hotel_norm_train[,-1], test = hotel_norm_test[, -1], cl = hotel_norm_train_labels$is_canceled, k = (sqrt(nrow(hotel_norm_train))))
+hotel_knn <- knn(train = hotel_norm_train, test = hotel_norm_test,
+                      cl = hotel_norm_train_labels, k=sqrt(nrow(hotel_norm_train)))
+hotel_knn
 
-
+knn_matrix <- confusionMatrix(hotel_knn, as.factor(hotel_norm_test_labels))
+knn_matrix
 ```
 
 ## ANN Model 
@@ -196,8 +183,6 @@ hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 
 ###Model
 ```{r}
-library(neuralnet)
-
 hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm)
 
 
@@ -217,36 +202,23 @@ ann_confusionmaxtrix
 ```{r}
 hotel_train <- hotel_random[-test_set, ]
 hotel_test <- hotel_random[test_set, ]
+
+hotel_train_labels <- hotel_random[-test_set, "is_canceled"]
+hotel_test_labels <- hotel_random[test_set, "is_canceled"]
 ```
 
-
-### Model #1
+### Model
 ```{r}
-library(kernlab)
+svm <- ksvm(is_canceled ~ ., data = hotel,
+                          kernel = "vanilladot")
+svm_predictions <- predict(svm, hotel_test, type= "response")
+svm_predictions <- ifelse(svm_predictions > 0.5, 1, 0)
 
-cancellation_classifier <- ksvm(is_canceled ~ ., data = hotel_train, kernel = "vanilladot")
-```
+svm_predictions <- as.factor(svm_predictions)
 
+svm_matrix <- confusionMatrix(svm_predictions, as.factor(hotel_test_labels))
+svm_matrix
 
-
-```{r}
-cancellation_predictions <- predict(cancellation_classifier, hotel_test[, -1])
-
-head(cancellation_predictions)
-
-table(cancellation_predictions, hotel_test$is_canceled)
-
-# look only at agreement vs. non-agreement
-# construct a vector of TRUE/FALSE indicating correct/incorrect predictions
-agreement <- cancellation_predictions == hotel_test$is_canceled
-table(agreement)
-prop.table(table(agreement))
-
-```
-
-
-```{r}
-svm_model2 <- ksvm(ChurnYes ~ ., data = telco_random, kernel = "rbfdot")
 ```
 
 ##Decision Tree
