@@ -42,8 +42,15 @@ hotel$arrival_date_year <- NULL
 hotel$arrival_date_week_number <- NULL
 hotel$arrival_date_day_of_month <- NULL
 hotel$reservation_status_date <- NULL
+
+#hotel$country <- ifelse(is.na(hotel$country), "No Country", na.rm = TRUE), hotel$country)
+
 hotel$country <- NULL
+
+#hotel$agent <- ifelse(is.na(hotel$agent), "No Agent", na.rm = TRUE), hotel$agent)
 hotel$agent <- NULL
+
+#hotel$company <- ifelse(is.na(hotel$company), "No Company", na.rm = TRUE), hotel$company)
 hotel$company <- NULL
 
 
