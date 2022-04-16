@@ -233,13 +233,36 @@ svm_matrix
 ```{r}
 hotel_train <- hotel_random[-test_set, ]
 hotel_test <- hotel_random[test_set, ]
+
+
+prop.table(table(hotel_train$is_canceled))
+prop.table(table(hotel_test$is_canceled))
 ```
 
 ###Model
 ```{r}
 
-
+library(C50)
+hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled))
+hotel_decision_model
 ```
+
+###Prediction
+```{r}
+hotel_pred <- predict(hotel_decision_model, hotel_test)
+```
+
+```{r}
+CrossTable(hotel_test$is_canceled, hotel_pred,
+           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+           dnn = c('actual cancellation', 'predicted cancellation'))
+```
+
+```{r}
+hotel_matrix <- confusionMatrix(as.factor(hotel_test$is_canceled), hotel_pred)
+hotel_matrix
+```
+
 
 
 ##Stacked Model
