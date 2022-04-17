@@ -9,6 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
 ##Libraries
 ```{r}
 library(gmodels)
@@ -52,8 +58,6 @@ hotel$company <- NULL
 hotel <- subset(hotel, hotel == "City Hotel")
 hotel$hotel <- NULL
 head(hotel, 200)
-
-str(hotel)
 ```
 
 ### Check for NAs
@@ -95,6 +99,10 @@ hotel_random$reserved_room_type <- as.factor(hotel_random$reserved_room_type)
 hotel_random$assigned_room_type <- as.factor(hotel_random$assigned_room_type)
 hotel_random$deposit_type <- as.factor(hotel_random$deposit_type)
 hotel_random$customer_type <- as.factor(hotel_random$customer_type)
+
+
+# Randomize again for good measure
+hotel_random <- hotel_random[sample(nrow(hotel_random)),]
 ```
 
 
@@ -114,21 +122,23 @@ normalize <- function(x) {
 hotel_norm <- as.data.frame(lapply(hotelDummy[2:ncol(hotelDummy)], normalize))
 
 ```
+### Test Set
 
+```{r}
+test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
+```
 
 
 ## Linear Regression Model
 
 ### Train and Test Dataset
 ```{r}
-test_set <- sample(1:nrow(hotel_random), 0.3*nrow(hotel_random))
-
-hotel_train <- hotel_random[-test_set, ]
-hotel_test <- hotel_random[test_set, ]
+glm_train <- hotel_random[-test_set, ]
+glm_test <- hotel_random[test_set, ]
 
 #Now the response (aka Labels) - only the yyes column
-hotel_train_labels <- hotel_random[-test_set, "is_canceled"]
-hotel_test_labels <- hotel_random[test_set, "is_canceled"]
+glm_train_labels <- hotel_random[-test_set, "is_canceled"]
+glm_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ```
 
@@ -136,10 +146,22 @@ hotel_test_labels <- hotel_random[test_set, "is_canceled"]
 ```{r}
 #Ryan
 #best r squared and most significant variables
-model <- glm(is_canceled ~ lead_time +  stays_in_week_nights +  adr  , data = hotel)
-summary(model)
+glm_model <- glm(is_canceled ~ lead_time + stays_in_week_nights + adr + is_repeated_guest + previous_cancellations +  meal + previous_bookings_not_canceled +   booking_changes + deposit_type + customer_type + total_of_special_requests, data = glm_train, family = 'binomial')
+summary(glm_model)
+```
 
+### Predictions
+```{r}
+glm_prediction <- predict(glm_model, glm_test, type="response")
+glm_prediction <- as.factor(ifelse(glm_prediction>0.5,1,0))
 
+write.csv(glm_prediction, "hotel_glm_predictions.csv")
+```
+
+### Matrix
+```{r}
+glm_matrix <- confusionMatrix(glm_prediction, as.factor(glm_test_labels), positive = '1')
+glm_matrix
 ```
 
 
@@ -148,29 +170,24 @@ summary(model)
 
 ### Train and Test Dataset
 ```{r}
-test_set <- sample(1:nrow(hotel_norm), 0.2*nrow(hotel_norm))
-
-hotel_norm_train <- hotel_norm[-test_set, ]
-hotel_norm_test <- hotel_norm[test_set, ]
+knn_train <- hotel_norm[-test_set, ]
+knn_test <- hotel_norm[test_set, ]
 
 #Now the response (aka Labels) - only the is_canceled column
-hotel_norm_train_labels <- hotel_random[-test_set, "is_canceled"]
-hotel_norm_test_labels <- hotel_random[test_set, "is_canceled"]
+knn_train_labels <- hotel_random[-test_set, "is_canceled"]
+knn_test_labels <- hotel_random[test_set, "is_canceled"]
 ```
 
-### Model
+###Model and Predictions
 ```{r}
-
-hotel_knn <- knn(train = hotel_norm_train, test = hotel_norm_test,
-                      cl = hotel_norm_train_labels, k=sqrt(nrow(hotel_norm_train)))
-
-write.csv(hotel_knn, "hotel_knn_pred.csv")
-
+hotel_knn <- knn(train = knn_train, test = knn_test,
+                      cl = knn_train_labels, k=sqrt(length(knn_train_labels)))
+write.csv(hotel_knn, "hotel_knn_predictions.csv")
 ```
 
 ###Confusion Matrix
 ```{r}
-knn_matrix <- confusionMatrix(hotel_knn, as.factor(hotel_norm_test_labels))
+knn_matrix <- confusionMatrix(as.factor(hotel_knn), as.factor(knn_test_labels))
 knn_matrix
 ```
 
@@ -181,113 +198,140 @@ knn_matrix
 ```{r}
 hotel_norm$is_canceled <- hotel_random$is_canceled
 
-test_set <- sample(1:nrow(hotel_norm), 0.2*nrow(hotel_norm))
-
-hotel_norm_train <- hotel_norm[-test_set, ]
-hotel_norm_test <- hotel_norm[test_set, ]
+ann_train <- hotel_norm[-test_set, ]
+ann_test <- hotel_norm[test_set, ]
 
 #Now the response (aka Labels) - only the yyes column
-hotel_norm_train_labels <- hotel_norm[-test_set, "is_canceled"]
-hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
+ann_train_labels <- hotel_norm[-test_set, "is_canceled"]
+ann_test_labels <- hotel_norm[test_set, "is_canceled"]
 ```
 
 ###Model
 ```{r}
-hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm_train, hidden = 3)
+hotel_ann <- neuralnet(formula = is_canceled ~ .,data = ann_train, hidden = 3)
 ```
 
 ###Prediction
 ```{r}
-ann_predictions <- predict(hotel_ann, hotel_norm, type="response")
+
+ann_predictions <- predict(hotel_ann, ann_test, type="response")
 ann_predictions <- as.factor(ifelse(ann_predictions>0.5,1,0))
 
-write.csv(ann_predictions, "hotel_ann_pred.csv")
+write.csv(ann_predictions, "hotel_ann_predictions.csv")
 ```
 
 ###Confusion Matrix
 ```{r}
-ann_confusionmaxtrix <- confusionMatrix(as.factor(factorize_ann_prediction), as.factor(hotel_norm$is_canceled))
-ann_confusionmaxtrix
-
+ann_maxtrix <- confusionMatrix(ann_predictions, as.factor(ann_test_labels))
+ann_maxtrix
 ```
 
 ##SVM
 
 ###Train and Test Datasets
 ```{r}
-test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
+svm_train <- hotel_random[-test_set, ]
+svm_test <- hotel_random[test_set, ]
 
-hotel_train <- hotel_random[-test_set, ]
-hotel_test <- hotel_random[test_set, ]
-
-hotel_train_labels <- hotel_random[-test_set, "is_canceled"]
-hotel_test_labels <- hotel_random[test_set, "is_canceled"]
+svm_train_labels <- hotel_random[-test_set, "is_canceled"]
+svm_test_labels <- hotel_random[test_set, "is_canceled"]
 ```
 
 ### Model
 ```{r}
-svm <- ksvm(is_canceled ~ ., data = hotel, kernel = "rbfdot")
-
+svm <- ksvm(is_canceled ~ ., data = svm_train, kernel = "vanilladot")
 ```
-### Predictions
 
+###Prediction
 ```{r}
-svm_predictions <- predict(svm, hotel_test, type= "response")
-svm_predictions <- ifelse(svm_predictions > 0.5, 1, 0)
+svm_predictions <- predict(svm, svm_test, type= "response")
+svm_predictions <- as.factor(ifelse(svm_predictions > 0.5, 1, 0))
 
-svm_predictions <- as.factor(svm_predictions)
-
-write.csv(svm_predictions, "hotel_svm_predictions.csv")
+write.csv(ann_predictions, "hotel_svm_predictions.csv")
 ```
+
 ###Confusion Matrix
 ```{r}
-svm_matrix <- confusionMatrix(svm_predictions, as.factor(hotel_test_labels))
+svm_matrix <- confusionMatrix(svm_predictions, as.factor(svm_test_labels))
 svm_matrix
-
 ```
+
 
 ##Decision Tree
 
 ###Train and Test Datasets
 ```{r}
-test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
-
-hotel_train <- hotel_random[-test_set, ]
-hotel_test <- hotel_random[test_set, ]
+tree_train <- hotel_random[-test_set, ]
+tree_test <- hotel_random[test_set, ]
 
 
-prop.table(table(hotel_train$is_canceled))
-prop.table(table(hotel_test$is_canceled))
+prop.table(table(tree_train$is_canceled))
+prop.table(table(tree_test$is_canceled))
 ```
 
 ###Model
 ```{r}
-
-library(C50)
-hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)
-
+hotel_decision_model <- C5.0(as.factor(is_canceled) ~ ., data = tree_train, trials = 10)
 ```
 
 ###Prediction
 ```{r}
-c50_hotel_pred <- predict(hotel_decision_model, hotel_test)
-write.csv(c50_hotel_pred, "decision_tree_pred.csv")
+
+c50_hotel_pred <- predict(hotel_decision_model, tree_test)
+write.csv(c50_hotel_pred, "hotel_c50_predictions.csv")
 ```
 
 ###Confusion Matrix
 ```{r}
-c50_matrix <- confusionMatrix(c50_hotel_pred, as.factor(hotel_test$is_canceled))
+c50_matrix <- confusionMatrix(c50_hotel_pred, as.factor(tree_test$is_canceled))
 c50_matrix
 ```
+
 
 
 ##Stacked Model
 
 ```{r}
+glm_predictions <- read.csv("hotel_glm_predictions.csv")
+knn_predictions <- read.csv("hotel_knn_predictions.csv")
+ann_predictions <- read.csv("hotel_ann_predictions.csv")
+svm_predictions <- read.csv("hotel_svm_predictions.csv")
+c50_predictions <- read.csv("hotel_c50_predictions.csv")
 
+combo_set <- data.frame(glm_test$is_canceled, glm_predictions$x, knn_predictions$x, ann_predictions$x, svm_predictions$x, c50_predictions$x)
+colnames(combo_set) <- c("Actual", "GLM", "KNN", "ANN", "SVM","TREE")
 
+combo_set$Actual <- as.factor(combo_set$Actual)
+```
+
+### Test and Train
+```{r}
+#Set up training data
+test_stacked_set <- sample(1:nrow(combo_set), 0.2*nrow(combo_set))
+
+stacked_train <- combo_set[-test_stacked_set,]
+stacked_test <- combo_set[test_stacked_set,]
 
 ```
 
+###Model
+```{r}
+
+#hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)
+hotel_stacked_model <- C5.0(as.factor(Actual) ~ ., data = stacked_train, trials = 20)
+summary(hotel_stacked_model)
+plot(hotel_stacked_model)
+```
+
+###Prediction
+```{r}
+stacked_predictions <- predict(hotel_stacked_model, stacked_test)
+```
+
+###Confusion Matrix
+```{r}
+stacked_matrix <- confusionMatrix(stacked_predictions, as.factor(stacked_test$Actual))
+stacked_matrix
+```
 
 ##Conclusion
