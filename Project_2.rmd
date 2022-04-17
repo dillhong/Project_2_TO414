@@ -138,15 +138,13 @@ glm_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ### Model
 ```{r}
-#Ryan
-#best r squared and most significant variables
-glm_model <- glm(is_canceled ~ lead_time + stays_in_week_nights + adr + is_repeated_guest + previous_cancellations +  meal + previous_bookings_not_canceled +   booking_changes + deposit_type + customer_type + total_of_special_requests, data = glm_train, family = 'binomial')
-summary(glm_model)
+glm <- glm(is_canceled ~ lead_time + stays_in_week_nights + adr + is_repeated_guest + previous_cancellations +  meal + previous_bookings_not_canceled +   booking_changes + deposit_type + customer_type + total_of_special_requests, data = glm_train, family = 'binomial')
+summary(glm)
 ```
 
 ### Predictions
 ```{r}
-glm_prediction <- predict(glm_model, glm_test, type="response")
+glm_prediction <- predict(glm, glm_test, type="response")
 glm_prediction <- as.factor(ifelse(glm_prediction>0.5,1,0))
 
 write.csv(glm_prediction, "hotel_glm_predictions.csv")
@@ -174,14 +172,14 @@ knn_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ###Model and Predictions
 ```{r}
-hotel_knn <- knn(train = knn_train, test = knn_test,
+knn <- knn(train = knn_train, test = knn_test,
                       cl = knn_train_labels, k=sqrt(length(knn_train_labels)))
-write.csv(hotel_knn, "hotel_knn_predictions.csv")
+write.csv(knn, "hotel_knn_predictions.csv")
 ```
 
 ###Confusion Matrix
 ```{r}
-knn_matrix <- confusionMatrix(as.factor(hotel_knn), as.factor(knn_test_labels))
+knn_matrix <- confusionMatrix(as.factor(knn), as.factor(knn_test_labels))
 knn_matrix
 ```
 
@@ -202,13 +200,13 @@ ann_test_labels <- hotel_norm[test_set, "is_canceled"]
 
 ###Model
 ```{r}
-hotel_ann <- neuralnet(formula = is_canceled ~ .,data = ann_train, hidden = 3)
+ann <- neuralnet(formula = is_canceled ~ .,data = ann_train, hidden = 3)
 ```
 
 ###Prediction
 ```{r}
 
-ann_predictions <- predict(hotel_ann, ann_test, type="response")
+ann_predictions <- predict(ann, ann_test, type="response")
 ann_predictions <- as.factor(ifelse(ann_predictions>0.5,1,0))
 
 write.csv(ann_predictions, "hotel_ann_predictions.csv")
@@ -265,13 +263,13 @@ prop.table(table(tree_test$is_canceled))
 
 ###Model
 ```{r}
-hotel_decision_model <- C5.0(as.factor(is_canceled) ~ ., data = tree_train, trials = 10)
+tree <- C5.0(as.factor(is_canceled) ~ ., data = tree_train, trials = 10)
 ```
 
 ###Prediction
 ```{r}
 
-c50_hotel_pred <- predict(hotel_decision_model, tree_test)
+c50_hotel_pred <- predict(tree, tree_test)
 write.csv(c50_hotel_pred, "hotel_c50_predictions.csv")
 ```
 
@@ -312,14 +310,14 @@ stacked_test <- combo_set[test_stacked_set,]
 ```{r}
 
 #hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)
-hotel_stacked_model <- C5.0(as.factor(Actual) ~ ., data = stacked_train, trials = 20)
-summary(hotel_stacked_model)
-plot(hotel_stacked_model)
+stacked <- C5.0(as.factor(Actual) ~ ., data = stacked_train, trials = 20)
+summary(stacked)
+plot(stacked)
 ```
 
 ###Prediction
 ```{r}
-stacked_predictions <- predict(hotel_stacked_model, stacked_test)
+stacked_predictions <- predict(stacked, stacked_test)
 ```
 
 ###Confusion Matrix
