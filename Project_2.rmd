@@ -166,6 +166,10 @@ hotel_knn <- knn(train = hotel_norm_train, test = hotel_norm_test,
 
 write.csv(hotel_knn, "hotel_knn_pred.csv")
 
+```
+
+###Confusion Matrix
+```{r}
 knn_matrix <- confusionMatrix(hotel_knn, as.factor(hotel_norm_test_labels))
 knn_matrix
 ```
@@ -189,15 +193,15 @@ hotel_norm_test_labels <- hotel_norm[test_set, "is_canceled"]
 
 ###Model
 ```{r}
-hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm)
+hotel_ann <- neuralnet(formula = is_canceled ~ .,data = hotel_norm_train, hidden = 3)
 ```
 
 ###Prediction
 ```{r}
-annprediction <- predict(hotel_ann, hotel_norm, type="response")
-factorize_ann_prediction <- as.factor(ifelse(annprediction>0.5,1,0))
+ann_predictions <- predict(hotel_ann, hotel_norm, type="response")
+ann_predictions <- as.factor(ifelse(ann_predictions>0.5,1,0))
 
-write.csv(factorize_ann_prediction, "hotel_ann_pred.csv")
+write.csv(ann_predictions, "hotel_ann_pred.csv")
 ```
 
 ###Confusion Matrix
@@ -222,15 +226,21 @@ hotel_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ### Model
 ```{r}
-svm <- ksvm(is_canceled ~ ., data = hotel, kernel = "vanilladot")
+svm <- ksvm(is_canceled ~ ., data = hotel, kernel = "rbfdot")
 
+```
+### Predictions
+
+```{r}
 svm_predictions <- predict(svm, hotel_test, type= "response")
 svm_predictions <- ifelse(svm_predictions > 0.5, 1, 0)
 
 svm_predictions <- as.factor(svm_predictions)
 
 write.csv(svm_predictions, "hotel_svm_predictions.csv")
-
+```
+###Confusion Matrix
+```{r}
 svm_matrix <- confusionMatrix(svm_predictions, as.factor(hotel_test_labels))
 svm_matrix
 
@@ -240,6 +250,8 @@ svm_matrix
 
 ###Train and Test Datasets
 ```{r}
+test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
+
 hotel_train <- hotel_random[-test_set, ]
 hotel_test <- hotel_random[test_set, ]
 
@@ -252,32 +264,20 @@ prop.table(table(hotel_test$is_canceled))
 ```{r}
 
 library(C50)
-hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled))
+hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)
 
-#plot(hotel_decision_model)
 ```
 
 ###Prediction
 ```{r}
-hotel_pred <- predict(hotel_decision_model, hotel_test)
-plot(hotel_pred)
-
-write.csv(hotel_pred, "decision_tree_pred.csv")
+c50_hotel_pred <- predict(hotel_decision_model, hotel_test)
+write.csv(c50_hotel_pred, "decision_tree_pred.csv")
 ```
 
+###Confusion Matrix
 ```{r}
-CrossTable(hotel_test$is_canceled, hotel_pred,
-           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
-           dnn = c('actual cancellation', 'predicted cancellation'))
-```
-
-```{r}
-hotel_matrix <- confusionMatrix(as.factor(hotel_test$is_canceled), hotel_pred)
-hotel_matrix
-```
-
-```{r}
-
+c50_matrix <- confusionMatrix(c50_hotel_pred, as.factor(hotel_test$is_canceled))
+c50_matrix
 ```
 
 
