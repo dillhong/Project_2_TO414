@@ -306,6 +306,33 @@ c50_matrix
 
 
 
+## Matrix Check
+
+```{r}
+glm_predictions <- read.csv("hotel_glm_predictions.csv")
+knn_predictions <- read.csv("hotel_knn_predictions.csv")
+ann_predictions <- read.csv("hotel_ann_predictions.csv")
+svm_predictions <- read.csv("hotel_svm_predictions_rbf.csv")
+c50_predictions <- read.csv("hotel_c50_predictions.csv")
+actuals <- read.csv('test_set_values.csv')
+
+glm_matrix <- confusionMatrix(as.factor(glm_predictions$x), as.factor(actuals$x))
+glm_matrix
+
+knn_matrix <- confusionMatrix(as.factor(knn_predictions$x), as.factor(actuals$x))
+knn_matrix
+
+ann_matrix <- confusionMatrix(as.factor(ann_predictions$x), as.factor(actuals$x))
+ann_matrix
+
+svm_matrix <- confusionMatrix(as.factor(svm_predictions$x), as.factor(actuals$x))
+svm_matrix
+
+c50_matrix <- confusionMatrix(as.factor(c50_predictions$x), as.factor(actuals$x))
+c50_matrix
+
+```
+
 ##Stacked Model
 
 ```{r}
