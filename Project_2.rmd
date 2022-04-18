@@ -300,7 +300,9 @@ write.csv(c50_hotel_pred, "hotel_c50_predictions.csv")
 
 ###Confusion Matrix
 ```{r}
-c50_matrix <- confusionMatrix(c50_hotel_pred, as.factor(tree_test$is_canceled))
+actuals <- read.csv('test_set_values.csv')
+c50_hotel_pred <- read.csv("hotel_c50_predictions.csv")
+c50_matrix <- confusionMatrix(as.factor(c50_hotel_pred$x), as.factor(actuals$x))
 c50_matrix
 ```
 
@@ -380,3 +382,26 @@ stacked_matrix
 ```
 
 ##Conclusion
+
+## Binning
+```{r}
+hotel <- read.csv("hotel_booking.csv")
+hotel <- subset(hotel, hotel == "City Hotel")
+hotel$hotel <- NULL
+hotel$arrival_date_day_of_month <- as.factor(hotel$arrival_date_day_of_month)
+hotel$arrival_date_year <- as.factor(hotel$arrival_date_year)
+hotel$arrival_date_month <- as.factor(hotel$arrival_date_month)
+hotel$adr <- as.factor(hotel$adr)
+hotel$x <- as.double(1)
+data <- aggregate(hotel$adr, list(hotel$arrival_date_day_of_month,hotel$arrival_date_year , hotel$arrival_date_month), FUN = function(x) length(unique(x)))
+data
+mean(data$x, na.rm = TRUE)
+
+```
+
+6034 predicted cancel
+38% cancelation rate
+daily average 42 people
+overbook 16 around people everyday with 85% confidence
+we can overbook a cerntain aomunt with 85% confidence
+15866
