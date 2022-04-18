@@ -2,14 +2,58 @@
 title: "Project_2"
 author: "Dillon Hong"
 date: "3/16/2022"
-output: html_document
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+    theme: united
+    highlight: tango
+    toc_float: true
+    number_sections: true
+  pdf_document:
+    toc: yes
+     
+---
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 14px;
+  }
+td {  /* Table  */
+  font-size: 8px;
+}
+h1.title {
+  font-size: 38px;
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  font-size: 32px;
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    font-size: 22px;
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+code.r{ /* Code block */
+    font-size: 14px;
+}
+pre { /* Code block - determines code spacing between lines */
+    font-size: 14px;
+}
+</style>
+
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##Libraries
+## Libraries
 ```{r}
 library(gmodels)
 library(caret)
@@ -101,7 +145,7 @@ hotel_random <- hotel_random[sample(nrow(hotel_random)),]
 
 
 
-# Normalized Data
+### Normalized Data
 ```{r}
 #get rid of factors so we can use KNN
 hotelDummy <- as.data.frame(model.matrix (~ . -1, data = hotel_random))
@@ -123,7 +167,17 @@ test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
 ```
 
 ```{r}
-write.csv(hotel_random[test_set, ]$is_canceled, "test_set_values.csv")
+#write.csv(hotel_random[test_set, ]$is_canceled, "test_set_values.csv")
+```
+### For Knitting Purposes
+
+```{r}
+test_set_is_canceled <- read.csv("test_set_values.csv")
+test_set_is_canceled <- test_set_is_canceled$x
+```
+
+```{r}
+#write.csv(hotel_random[test_set, ]$is_canceled, "test_set_values.csv")
 ```
 
 
@@ -142,21 +196,25 @@ glm_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ### Model
 ```{r}
-glm <- glm(is_canceled ~ lead_time + stays_in_week_nights + adr + is_repeated_guest + previous_cancellations +  meal + previous_bookings_not_canceled +   booking_changes + deposit_type + customer_type + total_of_special_requests, data = glm_train, family = 'binomial')
-summary(glm)
+#glm <- glm(is_canceled ~ lead_time + stays_in_week_nights + adr + is_repeated_guest + previous_cancellations +  meal + previous_bookings_not_canceled +   booking_changes + deposit_type + customer_type + total_of_special_requests, data = glm_train, family = 'binomial')
+#summary(glm)
 ```
 
 ### Predictions
 ```{r}
-glm_prediction <- predict(glm, glm_test, type="response")
-glm_prediction <- as.factor(ifelse(glm_prediction>0.5,1,0))
+#for knitting purposes
 
-write.csv(glm_prediction, "hotel_glm_predictions.csv")
+##glm_prediction <- as.factor(ifelse(glm_prediction>0.5,1,0))
+#write.csv(glm_prediction, "hotel_glm_predictions.csv")
 ```
 
 ### Matrix
 ```{r}
-glm_matrix <- confusionMatrix(glm_prediction, as.factor(glm_test_labels), positive = '1')
+#for knitting purposes
+#glm_matrix <- confusionMatrix(glm_prediction, as.factor(glm_test_labels), positive = '1')
+glm_prediction <- read.csv("hotel_glm_predictions.csv")
+glm_prediction <- glm_prediction$x
+glm_matrix <- confusionMatrix(as.factor(glm_prediction), as.factor(test_set_is_canceled), positive = '1')
 glm_matrix
 ```
 
@@ -174,21 +232,23 @@ knn_train_labels <- hotel_random[-test_set, "is_canceled"]
 knn_test_labels <- hotel_random[test_set, "is_canceled"]
 ```
 
-###Model and Predictions
+### Model and Predictions
 ```{r}
-knn <- knn(train = knn_train, test = knn_test,
-                      cl = knn_train_labels, k=sqrt(length(knn_train_labels)))
-write.csv(knn, "hotel_knn_predictions.csv")
+#knn <- knn(train = knn_train, test = knn_test, cl = knn_train_labels, k=sqrt(length(knn_train_labels)))
+#write.csv(knn, "hotel_knn_predictions.csv")
 ```
 
-###Confusion Matrix
+### Confusion Matrix
 ```{r}
-knn_matrix <- confusionMatrix(as.factor(knn), as.factor(knn_test_labels))
+#for knitting purposes
+#knn_matrix <- confusionMatrix(as.factor(knn), as.factor(knn_test_labels))
+knn <- read.csv("hotel_knn_predictions.csv")
+knn <- knn$x
+knn_matrix <- confusionMatrix(as.factor(knn), as.factor(test_set_is_canceled))
 knn_matrix
 ```
 
 ## ANN Model 
-
 
 ### Train and Test Dataset
 ```{r}
@@ -202,29 +262,33 @@ ann_train_labels <- hotel_norm[-test_set, "is_canceled"]
 ann_test_labels <- hotel_norm[test_set, "is_canceled"]
 ```
 
-###Model
+### Model
 ```{r}
-ann <- neuralnet(formula = is_canceled ~ .,data = ann_train)
+#ann <- neuralnet(formula = is_canceled ~ .,data = ann_train)
 ```
 
-###Prediction
+### Prediction
 ```{r}
 
-ann_predictions <- predict(ann, ann_test, type="response")
-ann_predictions <- as.factor(ifelse(ann_predictions>0.5,1,0))
+#ann_predictions <- predict(ann, ann_test, type="response")
+#ann_predictions <- as.factor(ifelse(ann_predictions>0.5,1,0))
 
-write.csv(ann_predictions, "hotel_ann_predictions.csv")
+#write.csv(ann_predictions, "hotel_ann_predictions.csv")
 ```
 
-###Confusion Matrix
+### Confusion Matrix
 ```{r}
-ann_maxtrix <- confusionMatrix(ann_predictions, as.factor(ann_test_labels))
+#for knitting purposes
+#ann_maxtrix <- confusionMatrix(ann_predictions, as.factor(ann_test_labels))
+ann_predictions <- read.csv("hotel_ann_predictions.csv")
+ann_predictions <- ann_predictions$x
+ann_maxtrix <- confusionMatrix(as.factor(ann_predictions), as.factor(test_set_is_canceled))
 ann_maxtrix
 ```
 
-##SVM
+## SVM
 
-###Train and Test Datasets
+### Train and Test Datasets
 ```{r}
 svm_train <- hotel_random[-test_set, ]
 svm_test <- hotel_random[test_set, ]
@@ -235,20 +299,24 @@ svm_test_labels <- hotel_random[test_set, "is_canceled"]
 
 ### Model - RBF
 ```{r}
-svm_rbf <- ksvm(is_canceled ~ ., data = svm_train, kernel = "rbfdot")
+#svm_rbf <- ksvm(is_canceled ~ ., data = svm_train, kernel = "rbfdot")
 ```
 
-###Prediction - RBF
+### Prediction - RBF
 ```{r}
-svm_predictions_rbf <- predict(svm_rbf, svm_test, type= "response")
-svm_predictions_rbf <- as.factor(ifelse(svm_predictions_rbf > 0.5, 1, 0))
+#svm_predictions_rbf <- predict(svm_rbf, svm_test, type= "response")
+#svm_predictions_rbf <- as.factor(ifelse(svm_predictions_rbf > 0.5, 1, 0))
 
-write.csv(svm_predictions_rbf, "hotel_svm_predictions_rbf.csv")
+#write.csv(svm_predictions_rbf, "hotel_svm_predictions_rbf.csv")
 ```
 
-###Confusion Matrix - RBF
+### Confusion Matrix - RBF
 ```{r}
-svm_matrix_rbf <- confusionMatrix(svm_predictions_rbf, as.factor(svm_test_labels))
+#for knitting purposes
+#svm_matrix_rbf <- confusionMatrix(svm_predictions_rbf, as.factor(svm_test_labels))
+svm_predictions_rbf <- read.csv("hotel_svm_predictions_rbf.csv")
+svm_predictions_rbf <- svm_predictions_rbf$x
+svm_matrix_rbf <- confusionMatrix(as.factor(svm_predictions_rbf), as.factor(test_set_is_canceled))
 svm_matrix_rbf
 ```
 
@@ -259,7 +327,7 @@ svm_matrix_rbf
 #svm_vanilla <- ksvm(is_canceled ~ ., data = svm_train, kernel = "vanilla")
 ```
 
-###Prediction - Vanilla
+### Prediction - Vanilla
 ```{r}
 #svm_predictions_vanilla <- predict(svm_vanilla, svm_test, type= "response")
 #svm_predictions_vanilla <- as.factor(ifelse(svm_predictions_vanilla > 0.5, 1, 0))
@@ -267,16 +335,16 @@ svm_matrix_rbf
 #write.csv(svm_predictions_vanilla, "hotel_svm_predictions_vanilla.csv")
 ```
 
-###Confusion Matrix - Vanilla
+### Confusion Matrix - Vanilla
 ```{r}
 #svm_matrix_vanilla <- confusionMatrix(svm_predictions_vanilla, as.factor(svm_test_labels))
 #svm_matrix_vanilla
 ```
 
 
-##Decision Tree
+## Decision Tree
 
-###Train and Test Datasets
+### Train and Test Datasets
 ```{r}
 tree_train <- hotel_random[-test_set, ]
 tree_test <- hotel_random[test_set, ]
@@ -286,56 +354,30 @@ prop.table(table(tree_train$is_canceled))
 prop.table(table(tree_test$is_canceled))
 ```
 
-###Model
+### Model
 ```{r}
-tree <- C5.0(as.factor(is_canceled) ~ ., data = tree_train, trials = 10)
+#tree <- C5.0(as.factor(is_canceled) ~ ., data = tree_train, trials = 10)
 ```
 
-###Prediction
+### Prediction
 ```{r}
 
-c50_hotel_pred <- predict(tree, tree_test)
-write.csv(c50_hotel_pred, "hotel_c50_predictions.csv")
+#c50_hotel_pred <- predict(tree, tree_test)
+#write.csv(c50_hotel_pred, "hotel_c50_predictions.csv")
 ```
 
-###Confusion Matrix
+### Confusion Matrix
 ```{r}
-actuals <- read.csv('test_set_values.csv')
+#for knitting purposes
+#c50_matrix <- confusionMatrix(c50_hotel_pred, as.factor(tree_test$is_canceled))
 c50_hotel_pred <- read.csv("hotel_c50_predictions.csv")
-c50_matrix <- confusionMatrix(as.factor(c50_hotel_pred$x), as.factor(actuals$x))
+c50_hotel_pred <- c50_hotel_pred$x
+
+c50_matrix <- confusionMatrix(as.factor(c50_hotel_pred), as.factor(test_set_is_canceled))
 c50_matrix
 ```
 
-
-
-## Matrix Check
-
-```{r}
-glm_predictions <- read.csv("hotel_glm_predictions.csv")
-knn_predictions <- read.csv("hotel_knn_predictions.csv")
-ann_predictions <- read.csv("hotel_ann_predictions.csv")
-svm_predictions <- read.csv("hotel_svm_predictions_rbf.csv")
-c50_predictions <- read.csv("hotel_c50_predictions.csv")
-actuals <- read.csv('test_set_values.csv')
-
-glm_matrix <- confusionMatrix(as.factor(glm_predictions$x), as.factor(actuals$x))
-glm_matrix
-
-knn_matrix <- confusionMatrix(as.factor(knn_predictions$x), as.factor(actuals$x))
-knn_matrix
-
-ann_matrix <- confusionMatrix(as.factor(ann_predictions$x), as.factor(actuals$x))
-ann_matrix
-
-svm_matrix <- confusionMatrix(as.factor(svm_predictions$x), as.factor(actuals$x))
-svm_matrix
-
-c50_matrix <- confusionMatrix(as.factor(c50_predictions$x), as.factor(actuals$x))
-c50_matrix
-
-```
-
-##Stacked Model
+## Stacked Model
 
 ```{r}
 glm_predictions <- read.csv("hotel_glm_predictions.csv")
@@ -361,7 +403,7 @@ stacked_test <- combo_set[test_stacked_set,]
 
 ```
 
-###Model
+### Model
 ```{r}
 
 #hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)
@@ -370,20 +412,20 @@ summary(stacked)
 plot(stacked)
 ```
 
-###Prediction
+### Prediction
 ```{r}
 stacked_predictions <- predict(stacked, stacked_test)
 ```
 
-###Confusion Matrix
+### Confusion Matrix
 ```{r}
 stacked_matrix <- confusionMatrix(stacked_predictions, as.factor(stacked_test$Actual))
 stacked_matrix
 ```
 
-##Conclusion
+## Conclusion
 
-## Binning
+### Analysis
 ```{r}
 hotel <- read.csv("hotel_booking.csv")
 hotel <- subset(hotel, hotel == "City Hotel")
