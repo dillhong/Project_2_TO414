@@ -200,7 +200,7 @@ ann_test_labels <- hotel_norm[test_set, "is_canceled"]
 
 ###Model
 ```{r}
-ann <- neuralnet(formula = is_canceled ~ .,data = ann_train, hidden = 3)
+ann <- neuralnet(formula = is_canceled ~ .,data = ann_train)
 ```
 
 ###Prediction
@@ -248,23 +248,25 @@ svm_matrix_rbf <- confusionMatrix(svm_predictions_rbf, as.factor(svm_test_labels
 svm_matrix_rbf
 ```
 
-### Model - Vanilla
+### Model - Vanilla 
 ```{r}
-svm_vanilla <- ksvm(is_canceled ~ ., data = svm_train, kernel = "vanilla")
+## Commented out as the Vanilla Kernel is the less efficient model
+
+#svm_vanilla <- ksvm(is_canceled ~ ., data = svm_train, kernel = "vanilla")
 ```
 
 ###Prediction - Vanilla
 ```{r}
-svm_predictions_vanilla <- predict(svm_vanilla, svm_test, type= "response")
-svm_predictions_vanilla <- as.factor(ifelse(svm_predictions_vanilla > 0.5, 1, 0))
+#svm_predictions_vanilla <- predict(svm_vanilla, svm_test, type= "response")
+#svm_predictions_vanilla <- as.factor(ifelse(svm_predictions_vanilla > 0.5, 1, 0))
 
-write.csv(svm_predictions_vanilla, "hotel_svm_predictions_vanilla.csv")
+#write.csv(svm_predictions_vanilla, "hotel_svm_predictions_vanilla.csv")
 ```
 
 ###Confusion Matrix - Vanilla
 ```{r}
-svm_matrix_vanilla <- confusionMatrix(svm_predictions_vanilla, as.factor(svm_test_labels))
-svm_matrix_vanilla
+#svm_matrix_vanilla <- confusionMatrix(svm_predictions_vanilla, as.factor(svm_test_labels))
+#svm_matrix_vanilla
 ```
 
 
