@@ -122,6 +122,10 @@ hotel_norm <- as.data.frame(lapply(hotelDummy[2:ncol(hotelDummy)], normalize))
 test_set <- sample(1:nrow(hotel_random), 0.2*nrow(hotel_random))
 ```
 
+```{r}
+write.csv(hotel_random[test_set, ]$is_canceled, "test_set_values.csv")
+```
+
 
 ## Linear Regression Model
 
@@ -310,8 +314,9 @@ knn_predictions <- read.csv("hotel_knn_predictions.csv")
 ann_predictions <- read.csv("hotel_ann_predictions.csv")
 svm_predictions <- read.csv("hotel_svm_predictions_rbf.csv")
 c50_predictions <- read.csv("hotel_c50_predictions.csv")
+actuals <- read.csv('test_set_values.csv')
 
-combo_set <- data.frame(glm_test$is_canceled, glm_predictions$x, knn_predictions$x, ann_predictions$x, svm_predictions$x, c50_predictions$x)
+combo_set <- data.frame(actuals$x, glm_predictions$x, knn_predictions$x, ann_predictions$x, svm_predictions$x, c50_predictions$x)
 colnames(combo_set) <- c("Actual", "GLM", "KNN", "ANN", "SVM","TREE")
 
 combo_set$Actual <- as.factor(combo_set$Actual)
