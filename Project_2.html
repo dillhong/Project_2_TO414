@@ -2129,15 +2129,14 @@ pre { /* Code block - determines code spacing between lines */
 </div>
 <div id="model-3" class="section level3" number="0.8.2">
 <h3><span class="header-section-number">0.8.2</span> Model</h3>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co">#hotel_decision_model &lt;- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)</span></span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>stacked <span class="ot">&lt;-</span> <span class="fu">C5.0</span>(<span class="fu">as.factor</span>(Actual) <span class="sc">~</span> ., <span class="at">data =</span> stacked_train, <span class="at">trials =</span> <span class="dv">20</span>)</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stacked)</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>stacked <span class="ot">&lt;-</span> <span class="fu">C5.0</span>(<span class="fu">as.factor</span>(Actual) <span class="sc">~</span> ., <span class="at">data =</span> stacked_train, <span class="at">trials =</span> <span class="dv">20</span>)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(stacked)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## C5.0.formula(formula = as.factor(Actual) ~ ., data = stacked_train, trials = 20)
 ## 
 ## 
-## C5.0 [Release 2.07 GPL Edition]      Mon Apr 18 20:33:37 2022
+## C5.0 [Release 2.07 GPL Edition]      Mon Apr 18 22:42:05 2022
 ## -------------------------------
 ## 
 ## Class specified by attribute `outcome&#39;

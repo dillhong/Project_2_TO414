@@ -406,7 +406,6 @@ stacked_test <- combo_set[test_stacked_set,]
 ### Model
 ```{r}
 
-#hotel_decision_model <- C5.0(hotel_train[-1], as.factor(hotel_train$is_canceled), trials = 10)
 stacked <- C5.0(as.factor(Actual) ~ ., data = stacked_train, trials = 20)
 summary(stacked)
 plot(stacked)
