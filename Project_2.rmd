@@ -441,9 +441,13 @@ mean(data$x, na.rm = TRUE)
 
 ```
 
-6034 predicted cancel
-38% cancelation rate
-daily average 42 people
-overbook 16 around people everyday with 85% confidence
-we can overbook a cerntain aomunt with 85% confidence
-15866
+### Summary
+
+According to our stacked model prediction, we predicted that 1,261 would cancel out of 3,173 people. That is about a 39.7% cancellation rate. According to our decision tree model there were 6,034 predicted cancel out of 15,866 people resulting in a 38% cancellation rate.
+
+After sorting through the data to connect how many bookings there are per day, we estimate a daily average of 42 people per day. As a result, that is about 16-17 cancellations per day with an over book of about 16-17 per day with 85% confidence on <1% margin of error. This would be used in the case that the hotel does not have the ability to run the model in order to make predictions. This method has a lot of flaws because it generalizes everyday to be the same when in reality some seasons of the year could have more cancellations than others.
+  If this method were to be used, cancellation can result in loss potential profit that those rooms could have provided. The mean average daily rate (ADR) is \$105.30. Therefore, with 16-17 average cancellations that is 16-17 rooms open and opportunity cost of \$1,684.80-\$1,790.10 per day or \$614,952-\$653,386.50 per year (assuming 365 days in a year).
+
+For actual usage, the model should be used to directly classify people that are likely to cancel and charge certain rates to those individuals. Some of the others models such as ANN  that give a probability instead of a classification could be useful to also classify individuals. Instead of the 0.50 threshold, a higher threshold could be used because some individuals may have higher probability as a result of having more previous cancellations.
+  After classification, a possible solution to counteract this without using overbooking is to charge people classified to cancel a higher rate than ones that aren't. The charges could be up to double to match the opportunity cost of the room if there is a no show. 
+
